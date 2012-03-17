@@ -1,0 +1,23 @@
+name: wheresmikecraig
+version: 0.0.0
+license: BSD3
+license-file: LICENSE.md
+author: Mike Craig <mkscrg@gmail.com>
+maintainer: Mike Craig <mkscrg@gmail.com>
+stability: experimental
+synopsis: Simple app to show my progress driving across the USA.
+description:
+homepage: https://github.com/mkscrg/wheresmikecraig
+bug-reports: https://github.com/mkscrg/wheresmikecraig/issues
+category:
+build-type: Simple
+cabal-version: >= 1.9.2
+extra-source-files: README.md
+
+executable recorder
+  main-is: main.hs
+  hs-source-dirs: recorder
+  ghc-options: -Wall -O2
+  build-depends:
+    base,
+    http-conduit
