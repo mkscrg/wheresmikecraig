@@ -15,13 +15,36 @@ cabal-version: >= 1.9.2
 extra-source-files: README.md
 
 executable recorder
-  main-is: main.hs
-  hs-source-dirs: recorder
+  main-is: recorder/main.hs
   ghc-options: -Wall -O2
   build-depends:
     aeson,
-    aeson-pretty,
+    attoparsec,
     base,
+    bson,
     bytestring,
+    compact-string-fix,
     http-conduit,
-    http-types
+    http-types,
+    mongoDB,
+    text,
+    time,
+    transformers,
+    unordered-containers,
+    vector,
+    yaml
+
+executable server
+  main-is: server/main.hs
+  ghc-options: -Wall -O2
+  build-depends:
+    base,
+    blaze-builder,
+    bytestring,
+    compact-string-fix,
+    conduit,
+    http-types,
+    mongoDB,
+    wai,
+    warp,
+    yaml
