@@ -38,13 +38,21 @@ executable server
   main-is: server/main.hs
   ghc-options: -Wall -O2
   build-depends:
+    aeson,
+    attoparsec,
     base,
     blaze-builder,
+    blaze-html,
+    bson,
     bytestring,
     compact-string-fix,
     conduit,
+    hamlet,
     http-types,
     mongoDB,
+    text,
+    unordered-containers,
+    vector,
     wai,
     warp,
     yaml
