@@ -1,38 +1,39 @@
-{-# LANGUAGE TemplateHaskell, QuasiQuotes #-}
+{-# LANGUAGE OverloadedStrings, TemplateHaskell, QuasiQuotes #-}
 
 module Main where
 
-import Control.Monad.Trans.Resource (ResourceT, withIO)
+import Prelude hiding (lookup)
+import Control.Monad.Trans.Resource (withIO)
 import Data.Aeson (encode)
 import Data.Text.Lazy.Encoding (decodeUtf8)
 import Database.MongoDB
-import Network.HTTP.Types
-import Network.Wai.Handler.Warp
-import Network.Wai
-import Text.Blaze
-import Text.Blaze.Renderer.Utf8
-import Text.Hamlet
+  ( Document, Query (sort), Value (Doc)
+  , (=:), findOne, select )
+import Network.HTTP.Types (status200)
+import Network.Wai.Handler.Warp (run)
+import Network.Wai (Application, Response (ResponseBuilder))
+import Text.Blaze (Html, preEscapedLazyText)
+import Text.Blaze.Renderer.Utf8 (renderHtmlBuilder)
+import Text.Hamlet (shamletFile)
 
 import Data.Bson.Aeson ()
 import Web.WheresMikeCraig.Config
 
 
-getPoints :: Config -> ResourceT IO [Document]
-getPoints cfg = do
-  (_, Right curs) <- withIO
-    (cfgAccess cfg $ find $ select [] $ cfgPointsColl cfg)
-    (\(Right curs) -> cfgAccess cfg (closeCursor curs) >> return ())
-  (_, Right points) <- withIO (cfgAccess cfg $ rest curs) $ const (return ())
-  return points
+getPoint :: Config -> IO Document
+getPoint cfg = do
+  Right (Just doc) <- cfgAccess cfg $ findOne
+    (select [] $ cfgPointsColl cfg) { sort = ["date_ts" =: (-1 :: Int)] }
+  return doc
 
 html :: Html -> Html
-html points = $(shamletFile "index.hamlet")
+html point = $(shamletFile "server/index.hamlet")
 
 server :: Config -> Application
 server cfg _ = do
-  points <- getPoints cfg
+  (_, point) <- withIO (getPoint cfg) $ const (return ())
   return $ ResponseBuilder status200 [] $ renderHtmlBuilder $
-    html $ preEscapedLazyText $ decodeUtf8 $ encode $ Array $ map Doc points
+    html $ preEscapedLazyText $ decodeUtf8 $ encode $ Doc point
 
 main :: IO ()
 main = do

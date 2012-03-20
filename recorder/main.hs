@@ -44,7 +44,7 @@ geoloqiUrl = "https://api.geoloqi.com/1/location/history"
 
 geoloqiReq :: Config -> Maybe POSIXTime -> Request IO
 geoloqiReq cfg mtime =
-  let opts = "?ignore_gaps=1" ++ case mtime of
+  let opts = "?ignore_gaps=1&count=100000" ++ case mtime of
         Just time -> "&after=" ++ show (truncate time :: Int)
         Nothing -> ""
       token = "OAuth " `B8.append` cfgGeoloqiToken cfg
