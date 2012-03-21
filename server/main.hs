@@ -38,4 +38,4 @@ server cfg _ = do
 main :: IO ()
 main = do
   cfg <- getConfig
-  run 3000 $ server cfg
+  run 80 $ server cfg

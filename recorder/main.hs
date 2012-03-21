@@ -3,6 +3,7 @@
 module Main where
 
 import Prelude hiding (lookup)
+import Control.Applicative ((<$>))
 import Data.Aeson (decode')
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.ByteString.Lazy.Char8 as L8
@@ -26,7 +27,7 @@ getLastTime cfg = do
   Right mdoc <- cfgAccess cfg $ findOne
     (select [] $ cfgPointsColl cfg) { sort = ["date_ts" =: (-1 :: Int)]
                                     , project = ["date_ts" =: (1 :: Int)] }
-  return $ mdoc >>= lookup "date_ts"
+  return $ fromIntegral <$> (mdoc >>= lookup "date_ts" :: Integer)
 
 insertPoints :: Config -> L8.ByteString -> IO ()
 insertPoints cfg bs = do
