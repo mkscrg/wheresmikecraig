@@ -27,7 +27,7 @@ getLastTime cfg = do
   Right mdoc <- cfgAccess cfg $ findOne
     (select [] $ cfgPointsColl cfg) { sort = ["date_ts" =: (-1 :: Int)]
                                     , project = ["date_ts" =: (1 :: Int)] }
-  return $ fromIntegral <$> (mdoc >>= lookup "date_ts" :: Integer)
+  return $ fromIntegral <$> (mdoc >>= lookup "date_ts" :: Maybe Integer)
 
 insertPoints :: Config -> L8.ByteString -> IO ()
 insertPoints cfg bs = do
