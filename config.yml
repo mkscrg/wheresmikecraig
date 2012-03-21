@@ -1,2 +1,3 @@
 database: "wheresmikecraig"
 points_collection: "points"
+server_port: 3000

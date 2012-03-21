@@ -11,7 +11,9 @@ import Database.MongoDB
   , (=:), findOne, select )
 import Network.HTTP.Types (status200)
 import Network.Wai.Handler.Warp (run)
-import Network.Wai (Application, Response (ResponseBuilder))
+import Network.Wai
+  ( Application, Response (ResponseBuilder), Request (pathInfo) )
+import Network.Wai.Application.Static (staticApp, defaultWebAppSettings)
 import Text.Blaze (Html, preEscapedLazyText)
 import Text.Blaze.Renderer.Utf8 (renderHtmlBuilder)
 import Text.Hamlet (shamletFile)
@@ -29,13 +31,23 @@ getPoint cfg = do
 html :: Html -> Html
 html point = $(shamletFile "server/index.hamlet")
 
-server :: Config -> Application
-server cfg _ = do
+index :: Config -> Application
+index cfg _ = do
   (_, point) <- withIO (getPoint cfg) $ const (return ())
   return $ ResponseBuilder status200 [] $ renderHtmlBuilder $
     html $ preEscapedLazyText $ decodeUtf8 $ encode $ Doc point
 
+
+static :: Application
+static = staticApp defaultWebAppSettings
+
+switch :: Config -> Application
+switch cfg req
+  | pathInfo req == [] = index cfg req
+  | otherwise = static req
+
+
 main :: IO ()
 main = do
   cfg <- getConfig
-  run 80 $ server cfg
+  run (cfgServerPort cfg) $ switch cfg

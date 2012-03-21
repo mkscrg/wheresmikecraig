@@ -13,12 +13,14 @@ import Database.MongoDB
   ( AccessMode (..), Action, Collection, Failure
   , (=:), access, connect, host, ensureIndex, index, iUnique, runIOE )
 import Network.HTTP.Types (Ascii)
+import Network.Wai.Handler.Warp (Port)
 import System.Environment (getEnv)
 
 data Config = Config
   { cfgAccess :: forall a. Action IO a -> IO (Either Failure a)
   , cfgPointsColl :: Collection
-  , cfgGeoloqiToken :: Ascii }
+  , cfgGeoloqiToken :: Ascii
+  , cfgServerPort :: Port }
 
 getConfig :: IO Config
 getConfig = do
@@ -34,5 +36,6 @@ getConfig = do
         ensureIndex $ index points ["date_ts" =: (1 :: Int)]
       Right () <- access' $
         ensureIndex $ (index points ["uuid" =: (1 :: Int)]) { iUnique = True }
-      return $ Config access' points token
+      port <- parseMonad (.: "server_port") v
+      return $ Config access' points token port
     _ -> fail "Invalid config file!"
