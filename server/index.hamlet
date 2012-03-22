@@ -15,7 +15,7 @@ $doctype 5
       <div class="page-header">
         <h1>Where's Mike Craig?
       <p>I'm driving from New York to San Francisco. I built this along the way. 
-        <a href="#" onClick="updateMap()">Click here</a> to update the position.
+        <span id="countdown">60</span> seconds to <a href="#" onClick="updateMap()">update</a>.
     <div id="map_canvas" style="width:100%; height:100%">
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js">
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyAKosjmdmsp5-4-zs6p5bEVXQGg4tO6UlE&sensor=false">
@@ -23,13 +23,20 @@ $doctype 5
       var dataUrl = "#{dataUrl}";
       var googleMap;
       var marker;
+      var timeToUpdate = 60;
+      var updateTTU = function() {
+        \$('span#countdown').html(timeToUpdate.toString());
+      };
       var updateMap = function() {
+        timeToUpdate = null;
         \$.get(dataUrl, function(pointJSON) {
           var point = $.parseJSON(pointJSON);
           marker.setPosition(new google.maps.LatLng(
             point["location"]["position"]["latitude"],
             point["location"]["position"]["longitude"]
           ));
+          timeToUpdate = 60;
+          updateTTU();
         });
       };
       var initialize = function() {
@@ -53,4 +60,12 @@ $doctype 5
           map: googleMap,
           title: latLng.toString()
         });
+        window.setInterval(function () {
+          if (timeToUpdate == 0) {
+            updateMap();
+          } else if (!(timeToUpdate == null)) {
+            timeToUpdate = timeToUpdate - 1;
+            updateTTU();
+          }
+        }, 1000);
       }
