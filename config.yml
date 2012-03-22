@@ -1,3 +1,4 @@
 database: "wheresmikecraig"
 points_collection: "points"
+data_url: "http://localhost:3000/point.json"
 server_port: 3000

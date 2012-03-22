@@ -8,6 +8,7 @@ module Web.WheresMikeCraig.Config
 import Control.Applicative ((<$>))
 import Data.ByteString.Char8 (pack)
 import Data.CompactString.Internal (CompactString (CS))
+import Data.Text (Text)
 import Data.Yaml ((.:), Value (Object), decodeFile, parseMonad)
 import Database.MongoDB
   ( AccessMode (..), Action, Collection, Failure
@@ -20,7 +21,8 @@ data Config = Config
   { cfgAccess :: forall a. Action IO a -> IO (Either Failure a)
   , cfgPointsColl :: Collection
   , cfgGeoloqiToken :: Ascii
-  , cfgServerPort :: Port }
+  , cfgServerPort :: Port
+  , cfgDataUrl :: Text }
 
 getConfig :: IO Config
 getConfig = do
@@ -37,5 +39,6 @@ getConfig = do
       Right () <- access' $
         ensureIndex $ (index points ["uuid" =: (1 :: Int)]) { iUnique = True }
       port <- parseMonad (.: "server_port") v
-      return $ Config access' points token port
+      dataUrl <- parseMonad (.: "data_url") v
+      return $ Config access' points token port dataUrl
     _ -> fail "Invalid config file!"
